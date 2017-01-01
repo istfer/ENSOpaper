@@ -121,3 +121,11 @@ EA_modes <- eot(x = pacificSST.dns, y = cruEastAfrica.dns, n = 3,
 plot(EA_modes, y = 1, 
      show.bp = TRUE, 
      arrange = "long")
+
+
+###### making sure that the obtained eot is ENSO ######
+
+# Download Nino3.4 Index
+# https://www.esrl.noaa.gov/psd/gcos_wgsp/Timeseries/Data/nino34.long.anom.data
+# Can be found under "data" directory in this repository
+nino <- read.table("nino34.long.anom.txt")
