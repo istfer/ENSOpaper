@@ -1,6 +1,5 @@
 library(ncdf4)
 library(remote)
-library(abind)
 
 ###### prepare pacific SST raster brick #####
 
@@ -123,9 +122,17 @@ plot(EA_modes, y = 1,
      arrange = "long")
 
 
-###### making sure that the obtained eot is ENSO ######
+###### making sure that the obtained 1st eot is ENSO ######
 
-# Download Nino3.4 Index
+# Download Nino3.4 Index from
 # https://www.esrl.noaa.gov/psd/gcos_wgsp/Timeseries/Data/nino34.long.anom.data
 # Can be found under "data" directory in this repository
 nino <- read.table("nino34.long.anom.txt")
+# extract 1951-2005
+nino5105 <- nino[which(nino$V1==1951):which(nino$V1==2005),]
+# head(nino5105)
+nino.ind <- c(t(nino5105[2:13]))
+# correlation
+cor(nino.ind, EA_modes@modes$mode_01@eot)
+
+
