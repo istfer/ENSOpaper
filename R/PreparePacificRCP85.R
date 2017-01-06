@@ -182,7 +182,7 @@ for(i in 1:660){
 ############## future ###################
 
 # set your directory where all the future pacific SST files are located
-setwd("path/to/your/folder/with/historical/pacificSST/ncfiles")
+setwd("path/to/your/folder/with/future/pacificSST/ncfiles")
 
 file.names.rcp <- list.files()
 
