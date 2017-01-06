@@ -138,10 +138,7 @@ MPIESMLR    <- createRasterBrick(pacMPIESMLR)
 
 
 # model-8 : NorESM1-M
-pacNorESM1=pac.SST.hs[[18]]
-#dim(pacNorESM1)
-
-# cut 1850 to 1951
+pacNorESM1 <- pac.SST.hs[[18]]
 pacNorESM1 <- pacNorESM1[,,1213:1872]
 NorESM1    <- createRasterBrick(pacNorESM1)
 #dim(NorESM1)
