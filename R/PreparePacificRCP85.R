@@ -183,7 +183,6 @@ for(i in 1:660){
 
 # set your directory where all the future pacific SST files are located
 setwd("path/to/your/folder/with/historical/pacificSST/ncfiles")
-setwd("~/Desktop/paper2_future/submission/data_code/future_pacific/rcp85/8models")
 
 file.names.rcp <- list.files()
 
