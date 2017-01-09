@@ -2,7 +2,6 @@
 
 library(ncdf4)
 library(abind)
-library(fields)
 library(raster)
 
 # set your working directory to where the CORDEX outputs for historical simulations are
