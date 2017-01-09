@@ -150,7 +150,7 @@ m10<-seq(10,1800,by=12)
 m11<-seq(11,1800,by=12)
 m12<-seq(12,1800,by=12)
 
-# changin precipitation flux to precipitation mm/yr
+# changin precipitation flux to precipitation mm/month
 for (i in 1:55){
   pre.hs.ensemble[,,m1[i]] <- pre.hs.ensemble[,,m1[i]]*60*60*24*31
   pre.hs.ensemble[,,m2[i]] <- pre.hs.ensemble[,,m2[i]]*60*60*24*28
