@@ -136,3 +136,11 @@ nino.ind <- c(t(nino5105[2:13]))
 cor(nino.ind, EA_modes@modes$mode_01@eot)
 
 
+
+########## save the prepared datasets ########## 
+# raw
+save(cruEastAfrica, file = "/path/to/your/raw/historical_CRU_precipitation_r.Rdata")
+save(pacificSST,    file = "/path/to/your/raw/historical_Pacific_SST_r.Rdata")
+# deseasoned and denoised
+save(cruEastAfrica.dns, file = "/path/to/your/deseasoned/and/denoised/historical_CRU_precipitation_dns.Rdata")
+save(pacificSST.dns,    file = "/path/to/your/deseasoned/and/denoised/historical_Pacific_SST_dns.Rdata")
