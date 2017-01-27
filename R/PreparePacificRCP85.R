@@ -334,6 +334,7 @@ for(i in 1:1140){
 # if you stack both historical and future ensemble together you can have a continious time series
 raspacSST <- stack(historical_ensemble, future_ensemble)
 
+save(raspacSST, file = "/path/to/processed/PacificSST/GCM/GCM_Pacific_SST.Rdata")
 # now you can use your Pacific SST ensembles in EOT analysis with CORDEX East Africa precipitation ensemble
 # see PrepareCORDEXensemblePRE.R for preparing the CORDEX data in a similar way
 
