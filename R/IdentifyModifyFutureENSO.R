@@ -33,22 +33,20 @@ eot.rcp.ts <- ts(eot.rcp,frequency=12,start=c(1951,1))
 
 # detrend
 deot <- eot.rcp.ts-lowess(eot.rcp.ts)$y
-# to obtain peaks such as the observed nino index 
-# we need to multiply by max(nino3.4) / max(deot)  ~= 2.25
 
-back.eot <- 2.25 * eot.rcp.ts
-deot_m <- back.eot - lowess(back.eot)$y
+# modify to obtain peaks such as the observed nino index 
+deot_m <- deot * 3
 
-plot(deot_m, lwd=2, xlab= "Years", ylab = "Anomalies in degrees C", main = "Modified ENSO signal")
-lines(deot, col = "gray70", lwd=2)
-legend("bottomright", legend = c("Modified ENSO", "ENSO future"), 
-       lwd=2, cex= 0.75, col=c("black", "gray70"), bty="n")
-# put back
-diff_new = EA_modes_rcp@modes$mode_01@resid_response # diff should be 50 x 47 x 1800, allocate
-for (i in 1:1800) diff_new[[i]]=back.eot[i]*EA_modes_rcp@modes$mode_01@slp_response + EA_modes_rcp@modes$mode_01@int_response
+# difference layers should be 50 x 47 x 1800, allocate
+diff_new <- diff <- EA_modes_rcp@modes$mode_01@resid_response 
+# use the slopes and intercepts obtained from EOT analysis on observational datasets
+# EA_modes object is obtained as explained in IdentifyHistoricalENSOSignal.R script
+for (i in 1:1800) diff[[i]]     <- deot[i]   * EA_modes@modes$mode_01@slp_response   + EA_modes@modes$mode_01@int_response
+for (i in 1:1800) diff_new[[i]] <- deot_m[i] * EA_modes@modes$mode_01@slp_response + EA_modes@modes$mode_01@int_response
 
-diff <- raspre.dns - EA_modes_rcp@modes$mode_01@resid_response
-resid <- raspre - diff
-EA_pre_new <- resid + diff_new
-# EA_pre_new to be used in the LPJ-GUESS simulations
+# load the bias corrected future precipitation data created as in biasCorrection.R
+load("/path/to/your/bias/corrected/rcp85/precipiation/dataset/CORDEXpreBC.Rdata")
+resid      <- XPRE_oncru - diff
+XPRE_oncru <- resid + diff_new
+# now XPRE_oncru raster is the future precipitation data with intensified ENSO signal
 
