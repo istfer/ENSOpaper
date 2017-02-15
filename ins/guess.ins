@@ -1,0 +1,692 @@
+!///////////////////////////////////////////////////////////////////////////////////////
+!// LPJ-GUESS INSTRUCTION SCRIPT FOR COHORT/INDIVIDUAL MODE
+!// Global PFTs
+!//
+!// Ben Smith, 2003-09-26
+!
+!// guess2008 updates
+!// 
+!///////////////////////////////////////////////////////////////////////////////////////
+
+
+!///////////////////////////////////////////////////////////////////////////////////////
+! Forcing Data & gridlists
+!
+
+! Atmospheric CO2 content (ppmv)
+! (used only by guessio.cpp)
+	param "file_co2" (str "co2_rcp85.txt")
+
+      	param "file_gridlist" (str "grids.txt")
+
+! Path to CRU data set
+	 param "file_cru" (str "CORDEX5100M.bin")
+
+! Path to LPJ soil code file
+! You may need to specify the full pathname (including directory) here
+	 ! param "file_soil" (str "/Users/istemfer/Desktop/LPJ-GUESS/guess_2.1/data/soils15k.txt")
+	 ! param "file_elv" (str "/Users/istemfer/Desktop/LPJ-GUESS/guess_2.1/data/elev15k.txt")
+
+
+!///////////////////////////////////////////////////////////////////////////////////////
+
+
+
+!///////////////////////////////////////////////////////////////////////////////////////
+! Output files
+!
+
+! guess2008 - New predefined outputs. Procedure adapted from Ben's LPJ-GUESS Education
+! outputdirectory is mandatory
+outputdirectory "./"
+
+! Prefined yearly output
+! These files may be outcommented if their output is not required. 
+file_cmass "cmass.out"
+file_anpp "anpp.out"
+file_lai "lai.out"
+file_cflux "cflux.out"
+file_dens "dens.out"
+file_runoff "tot_runoff.out"
+file_cpool "cpool.out"
+file_firert "firert.out"
+
+! Monthly outputs
+file_mnpp "mnpp.out"
+file_mlai "mlai.out"
+file_mrh "mrh.out"
+file_mgpp "mgpp.out"
+file_mra "mra.out"
+file_mnee "mnee.out"
+file_maet "maet.out"
+file_mpet "mpet.out"
+file_mevap "mevap.out"
+file_mintercep "mintercep.out"
+file_mrunoff "mrunoff.out"
+file_mwcont_upper "mwcont_upper.out"
+file_mwcont_lower "mwcont_lower.out"
+!///////////////////////////////////////////////////////////////////////////////////////
+
+
+
+!///////////////////////////////////////////////////////////////////////////////////////
+!// RUN PARAMETERS AND OPTIONS 
+!
+
+! Whether annual output desired (1) or not (0)
+	param "annual_output" (num 1)
+
+! Settings recognised by Plib
+! Run GUESS with -help option for list of keywords and their meanings
+
+title 'LPJ-GUESS (guess2008) cohort mode - global pfts'
+
+vegmode "cohort"		! "cohort", "individual" or "population"
+nyear_spinup 500			! number of years to run the model
+ifdailynpp 0			! whether to calculate NPP daily (1) or monthly (0)
+						! guess2008 - species version has 1
+ifdailydecomp 0			! whether to calculate soil respiration daily (1) or monthly (0)
+ifcalcsla 1				! whether to calculate SLA from leaf longevity
+						! (PFT-specific value can be specified in this file instead)
+iffire 1				! whether to implement fire (1) or not (0)
+npatch 30				! number of replicate patches to simulate
+patcharea 1000			! patch area (m2)
+estinterval 5			! years between establishment events in cohort mode
+ifdisturb 1				! whether generic patch-destroying disturbances enabled
+distinterval 100		! average return time for generic patch-destroying disturbances
+						! guess2008 - 200 for Europe, 100 globally
+ifbgestab 1				! whether background establishment enabled
+ifsme 1					! whether spatial mass effect enabled
+ifstochestab 1			! whether establishment stochastic
+ifstochmort 1			! whether mortality stochastic
+ifcdebt 1				! whether to allow vegetation C storage (1) or not (0)
+
+
+! guess2008 - additions
+ifsmoothgreffmort 1				! whether to vary mort_greff smoothly with growth efficiency (1) 
+								! or to use the standard step-function (0)  
+								! greff_min values below calibrated for the smooth (1) option 
+ifdroughtlimitedestab 1			! whether establishment is limited by growing season drought
+								! guess2008 - species version has 1
+ifrainonwetdaysonly 0			! whether to rain on wet days only (1), or to rain a bit every day (0)
+ifspeciesspecificwateruptake 0	! whether there is species specific water uptake (1) or not (0)
+!///////////////////////////////////////////////////////////////////////////////////////
+
+
+
+!///////////////////////////////////////////////////////////////////////////////////////
+!// EVALUATION OPTIONS & SWITCHES 
+!
+
+!///////////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+!///////////////////////////////////////////////////////////////////////////////////////
+!// PARAMETERS FOR PFTS
+!// Run GUESS with -help option for list of keywords and their meanings
+
+group "common" (
+
+	! Parameters common to all PFTs
+
+	lambda_max 0.8
+	reprfrac 0.1
+	cton_leaf 29			
+	cton_root 29
+)
+
+group "tree" (
+
+	! Parameters common to all trees
+
+	common
+	lifeform "tree"
+	ltor_max 1
+        k_allom2 60
+        k_allom3 0.67
+	cton_sap 330
+	pathway "c3"
+	kest_repr 200 	! 200
+	k_rp 1.6
+	kest_bg 0.1 	! 1 i guess2008
+	kest_pres 1 	! 0 i guess2008
+	k_chilla 0
+)
+
+group "grass" (
+
+	! Parameters common to all grasses
+
+	common
+	lifeform "grass"
+	ltor_max 0.5 	!0.5
+	gmin 0.5
+	phenology "any"
+	intc 0.01
+
+)
+
+
+group "broadleaved" (
+
+	! Parameters common to all broadleaved trees
+        k_allom1 250
+        k_latosa 6000
+        gmin 0.5
+        intc 0.02
+)
+
+group "needleleaved" (
+
+	! Parameters common to all needleleaved trees
+        k_allom1 150
+        k_latosa 5000
+        gmin 0.3
+        intc 0.06
+)
+
+pft "MBS" (
+
+        ! Montane broadleaved summergreen
+
+        include 1
+        tree
+	broadleaved	
+        crownarea_max 40
+        wooddens 250
+	rootdist 0.7 0.3
+	wscal_min 0
+        emax 5.0
+	parff_min 1250000
+	est_max 0.05
+        alphar 2.0
+        greff_min 0.04
+	respcoeff 1.2
+	turnover_sap 0.05
+	phenology "summergreen"
+        turnover_leaf 1.0
+        turnover_root 0.7
+        !k_allom1 250  
+        !k_allom2 40  
+        !k_allom3 0.67  
+        !k_latosa 6000
+	leaflong 0.5
+        longevity 300
+	phengdd5ramp 150
+        pstemp_min -4
+        pstemp_low 15
+        pstemp_high 25
+        pstemp_max 38
+        fireresist 0.12
+        litterme 0.3
+	tcmin_surv -1000
+        tcmin_est -1000
+        tcmax_est 10
+        twmin_est -1000
+        gdd5min_est 350
+        k_chillb 0
+        k_chillk 0
+	drought_tolerance 0.3
+	!intc 0.06
+)
+
+
+pft "MNE" (
+
+	! Montane needleleaved evergreen tree
+
+        include 1
+        tree
+        needleleaved
+        crownarea_max 30
+        wooddens 250
+	rootdist 0.6 0.4
+        wscal_min 0
+        emax 5.0
+	parff_min 1250000
+	est_max 0.05
+        alphar 2.0
+        greff_min 0.04
+	turnover_sap 0.05
+        respcoeff 1.2
+        phenology "evergreen"
+        turnover_leaf 0.5
+        turnover_root 0.7
+        !k_allom1 150  
+        !k_allom2 40  
+        !k_allom3 0.67  
+        !k_latosa 5000
+        leaflong 2
+        longevity 300
+        phengdd5ramp 0
+        pstemp_min -4
+        pstemp_low 15
+        pstemp_high 25
+        pstemp_max 38
+        fireresist 0.12
+        litterme 0.3
+        tcmin_surv -32.5
+        tcmin_est -32.5
+        tcmax_est 10
+        twmin_est -1000
+        gdd5min_est 600
+        k_chillb 100
+        k_chillk 0.05
+	drought_tolerance 0.2
+)
+
+
+
+
+pft "TeBS" (
+
+	! Shade-tolerant temperate broadleaved summergreen tree
+
+	include 1
+        tree
+	broadleaved
+        crownarea_max 40
+        wooddens 200
+        rootdist 0.7 0.3
+        wscal_min 0
+        !gmin 0.5
+        emax 5.0
+        parff_min 1250000
+        est_max 0.05
+        alphar 2.0
+        greff_min 0.04
+        turnover_sap 0.05
+        respcoeff 1.2
+        phenology "summergreen"
+        turnover_leaf 1
+        turnover_root 1
+        !k_allom1 250
+        !k_allom2 40
+        !k_allom3 0.67
+        !k_latosa 6000
+        leaflong 0.5
+        longevity 300
+        phengdd5ramp 200
+        pstemp_min -4
+        pstemp_low 20
+        pstemp_high 25
+        pstemp_max 38
+        fireresist 0.12
+        litterme 0.35
+        tcmin_surv -17
+        tcmin_est -17
+        tcmax_est 18.5
+        twmin_est -1000
+        gdd5min_est 1200
+        k_chillb 100
+        k_chillk 0.05
+        drought_tolerance 0.3
+)
+
+pft "TeBE" (
+
+	! Temperate broadleaved evergreen tree
+
+	include 1
+        tree
+        broadleaved
+        crownarea_max 40
+        wooddens 200
+        rootdist 0.7 0.3
+        wscal_min 0
+        !gmin 0.5
+        emax 5.0
+        parff_min 1250000
+        est_max 0.05
+        alphar 2.0
+        greff_min 0.04
+        turnover_sap 0.05
+        respcoeff 1.2
+        phenology "evergreen"
+        turnover_leaf 1.0
+        turnover_root 1.0
+        !k_allom1 250
+        !k_allom2 40
+        !k_allom3 0.67
+        !k_latosa 6000
+        leaflong 2
+        longevity 300
+        phengdd5ramp 0
+        pstemp_min -4
+        pstemp_low 20
+        pstemp_high 30
+        pstemp_max 42
+        fireresist 0.3
+        litterme 0.35
+        tcmin_surv 3
+        tcmin_est 3
+        tcmax_est 18.5
+        twmin_est -1000
+        gdd5min_est 1200
+        k_chillb 100
+        k_chillk 0.05
+        drought_tolerance 0.1
+)
+
+pft "TeNE" (
+
+	! Temperate broadleaved evergreen tree
+
+	include 1
+        tree
+        needleleaved
+        rootdist 0.6 0.4
+        wooddens 200
+        crownarea_max 30
+        wscal_min 0
+        !gmin 0.3
+        emax 5.0
+        parff_min 1250000
+        est_max 0.05
+        alphar 2.0
+        greff_min 0.04
+        turnover_sap 0.05
+        respcoeff 1.2
+        phenology "evergreen"
+        turnover_leaf 0.25
+        turnover_root 0.25
+        !k_allom1 150
+        !k_allom2 40
+        !k_allom3 0.67
+        !k_latosa 5000
+        leaflong 2
+        longevity 300
+        phengdd5ramp 0
+        pstemp_min -4
+        pstemp_low 20
+        pstemp_high 30
+        pstemp_max 42
+        fireresist 0.5
+        litterme 0.35
+        tcmin_surv -2
+        tcmin_est -2
+        tcmax_est 20
+        twmin_est -1000
+        gdd5min_est 1200
+        k_chillb 100
+        k_chillk 0.05
+        drought_tolerance 0.08
+)
+
+pft "TrBE" (
+
+	! Tropical broadleaved evergreen tree
+
+        include 1
+        tree
+        broadleaved
+        crownarea_max 50
+        wooddens 200
+        rootdist 0.8 0.2
+        wscal_min 0
+        emax 7.0
+        parff_min 1250000
+        est_max 0.05
+        alphar 3.0
+        greff_min 0.04
+        turnover_sap 0.05
+        respcoeff 0.15
+        phenology "evergreen"
+        turnover_leaf 0.5
+        turnover_root 0.7
+        !k_allom1 250
+        !k_allom2 60
+        !k_allom3 0.67
+        !k_latosa 6000
+        leaflong 2
+        longevity 500
+        phengdd5ramp 0
+        pstemp_min 2
+        pstemp_low 22
+        pstemp_high 30
+        pstemp_max 55
+        fireresist 0.15
+        litterme 0.1
+        tcmin_surv 15.5
+        tcmin_est 15.5
+        tcmax_est 1000
+        twmin_est -1000
+        gdd5min_est 0
+        k_chillb 100   !0
+        k_chillk 0.5  !0
+        drought_tolerance 0.15
+
+)
+
+
+pft "TrIBE" (
+
+        ! Tropical broadleaved evergreen tree
+
+        include 1
+        tree
+        broadleaved
+        crownarea_max 50
+        wooddens 200
+        rootdist 0.6 0.4 !0.5 0.5  
+        wscal_min 0
+        emax 7.0
+        parff_min 2500000
+        est_max 0.2
+        alphar 10.0
+        greff_min 0.08
+        turnover_sap 0.1
+        respcoeff 0.15
+        phenology "evergreen"
+        turnover_leaf 0.5
+        turnover_root 0.7
+        !k_allom1 250
+        !k_allom2 60
+        !k_allom3 0.67
+        !k_latosa 6000
+        leaflong 2
+        longevity 500
+        phengdd5ramp 0
+        pstemp_min 2
+        pstemp_low 24
+        pstemp_high 32
+        pstemp_max 55
+        fireresist 0.25
+        litterme 0.1
+        tcmin_surv 15.5
+        tcmin_est 15.5
+        tcmax_est 1000
+        twmin_est -1000
+        gdd5min_est 0
+        k_chillb 100 !0
+        k_chillk 0.05 !0
+        drought_tolerance 0.1
+)
+
+pft "TrBR" (
+
+	! Tropical broadleaved raingreen tree
+
+        include 1
+        tree
+        broadleaved
+        crownarea_max 40
+        wooddens 200
+        rootdist 0.8 0.2   !0.7 0.3
+        wscal_min 0.1 !0.3
+        !gmin 0.5
+        emax 7.0
+        parff_min 1250000
+        est_max 0.05
+        alphar 2.0
+        greff_min 0.04
+        turnover_sap 0.05
+        respcoeff 0.15
+        phenology "raingreen"
+        turnover_leaf 1.0
+        turnover_root 1.0
+        !k_allom1 250
+        !k_allom2 40
+        !k_allom3 0.67
+        !k_latosa 6000
+        leaflong 0.5
+        longevity 400
+        phengdd5ramp 0
+        pstemp_min 2
+        pstemp_low 22
+        pstemp_high 30
+        pstemp_max 55
+        fireresist 0.15
+        litterme 0.1
+        tcmin_surv 15.5
+        tcmin_est 15.5
+        tcmax_est 1000
+        twmin_est -1000
+        gdd5min_est 0
+        k_chillb 100 !0
+        k_chillk 0.05   !0
+        drought_tolerance 0.1
+)
+
+pft "TrIBR" (
+
+        ! Tropical broadleaved raingreen tree
+
+        include 1
+        tree
+        broadleaved
+        crownarea_max 40
+        wooddens 200
+        rootdist 0.5 0.5 !0.6 0.4
+        wscal_min 0.1 !0.3
+        !gmin 0.5
+        emax 7.0
+        parff_min 2500000
+        est_max 0.2
+        alphar 10.0
+        greff_min 0.08
+        turnover_sap 0.1
+        respcoeff 0.15
+        phenology "raingreen"
+        turnover_leaf 1.0
+        turnover_root 1.0
+        !k_allom1 250
+        !k_allom2 40
+        !k_allom3 0.67
+        !k_latosa 6000
+        leaflong 0.5
+        longevity 400
+        phengdd5ramp 0
+        pstemp_min 2
+        pstemp_low 24
+        pstemp_high 32
+        pstemp_max 55
+        fireresist 0.35
+        litterme 0.1
+        tcmin_surv 15.5
+        tcmin_est 15.5
+        tcmax_est 1000
+        twmin_est -1000
+        gdd5min_est 0
+        k_chillb 100   !0
+        k_chillk 0.05   !0
+        drought_tolerance 0.1 !0.05
+)
+
+pft "C3CG" (
+
+	! Cool (C3) grass
+
+	include 1
+	grass
+	pathway "c3"
+	rootdist 0.9 0.1
+	respcoeff 1.0
+	wscal_min 0.1
+	emax 5
+	est_max 1
+	parff_min 1250000
+        turnover_leaf 1
+	leaflong 1
+	turnover_root 0.7
+	pstemp_min -5
+	pstemp_low 5
+	pstemp_high 25
+	pstemp_max 38
+	tcmin_surv -1000	!no limit
+	tcmin_est -1000 	!no limit
+	tcmax_est 15.5  	!no limit
+	twmin_est -1000 	!no limit
+	gdd5min_est 0   	!no limit
+	fireresist 0.5
+        litterme 0.1
+	phengdd5ramp 0
+	drought_tolerance 0.01
+)
+
+pft "C3WG" (
+
+	! Warm (C3) grass
+
+	include 1
+	grass
+	pathway "c3"
+	wscal_min 0.1
+	rootdist 0.8 0.2
+	respcoeff 1.0
+	emax 5
+	est_max 1
+	parff_min 1250000
+        turnover_leaf 1
+	leaflong 1
+	turnover_root 0.7
+	pstemp_min 0
+	pstemp_low 10
+	pstemp_high 30
+	pstemp_max 55
+	tcmin_surv -1000	!no limit
+	tcmin_est -1000 	!no limit
+	tcmax_est 1000  	!no limit
+	twmin_est -1000 	!no limit
+	gdd5min_est 0   	!no limit
+	fireresist 0.5
+        litterme 0.35
+	phengdd5ramp 100
+	drought_tolerance 0.01
+)
+
+
+pft "C4G" (
+
+	! Warm (C3) grass
+
+	include 1
+	grass
+	pathway "c4"
+	wscal_min 0.2
+	rootdist 0.8 0.2
+	respcoeff 0.5
+	pstemp_min 6
+	pstemp_low 30
+	pstemp_high 45
+	pstemp_max 55
+	emax 7
+	est_max 1
+	parff_min 1250000
+        turnover_leaf 1
+	leaflong 1
+	turnover_root 0.7
+	tcmin_surv 15.5
+	tcmin_est 15.5
+	tcmax_est 1000  !no limit
+	twmin_est -1000 !no limit
+	gdd5min_est 0   !no limit
+        phengdd5ramp 100
+	fireresist 0.5
+	litterme 0.1
+	drought_tolerance 0.01
+)
+
