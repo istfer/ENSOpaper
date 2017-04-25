@@ -6,6 +6,9 @@ library(raster)
 
 # set your working directory to where the CORDEX outputs for historical simulations are
 # these data can be downladed from ESGF data portal https://pcmdi.llnl.gov/search/esgf-llnl/
+# 25/04/2017 UPDATE: ESGF server has been renamed to esgf-node.llnl.gov
+# data can be downloaded from https://esgf-node.llnl.gov/search/esgf-llnl/
+
 setwd("/path/to/your/historical/CORDEX/precipitation/files")
 
 # get file names

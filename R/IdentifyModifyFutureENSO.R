@@ -22,11 +22,13 @@ EA_modes_rcp <- eot(x = raspacSST.dns, y = raspre.dns, n = 3,
                     reduce.both = TRUE, standardised = FALSE,
                     verbose = TRUE)
 
-# The indice for the base point of the first mode 
-bp <- EA_modes_rcp@modes$mode_01@cell_bp
-
-eot.rcp <- rep(NA,1800) # EOT should be a time series of length 1800, declaring
-for(i in 1:1800) eot.rcp[i] <- raspacSST.dns[[i]][bp]
+eot.rcp.ts <- EA_modes_rcp@modes$mode_01@eot
+# Another way to retrieve first mode
+# # The indice for the base point of the first mode 
+# bp <- EA_modes_rcp@modes$mode_01@cell_bp
+# 
+# eot.rcp <- rep(NA,1800) # EOT should be a time series of length 1800, declaring
+# for(i in 1:1800) eot.rcp[i] <- raspacSST.dns[[i]][bp]
 
 # create a time-series object
 eot.rcp.ts <- ts(eot.rcp,frequency=12,start=c(1951,1))
